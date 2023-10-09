@@ -1,0 +1,17 @@
+
+Filters:
+  radius: 61.217,-149.863:1300
+  status: 1
+
+   id asn_v4 asn_v6 country     status     
+===========================================
+ 1118   6058      -   ca       Connected   
+14300   8047      -   us       Connected   
+51310   8047      -   us       Connected   
+51754   8047      -   us       Connected   
+52344  11090      -   us       Connected   
+60259   8047   8047   us       Connected   
+61113  14593      -   us       Connected   
+61868  20057      -   us       Connected   
+===========================================
+                             Showing 8 of 8
