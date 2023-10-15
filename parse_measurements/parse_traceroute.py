@@ -48,8 +48,3 @@ def get_traceroute_results(measurementid):
     else:
         raise Exception("HTTP request to API failed")
     
-
-
-
-if __name__ == "__main__":
-    get_traceroute_results()
