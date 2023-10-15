@@ -92,5 +92,6 @@ class CreateMeasurements:
 
             })
             measurement_data = pd.concat([measurement_data,temp_dataframe],ignore_index=True)
-        measurement_data.to_csv("./measurements.csv",mode='a')
+            measurement_data['measurement_id'] = measurement_data['measurement_id'].astype('Int64')
+        measurement_data.to_csv("./measurements.csv",mode='a',header=False,index=False)
 
