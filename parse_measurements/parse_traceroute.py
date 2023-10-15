@@ -5,8 +5,10 @@ import os
 import requests
 
 # unfortunately sagan is only fully compatible with v1 of the ripe atlas api
-def get_traceroute_results():
-    source = "https://atlas.ripe.net/api/v2/measurements/61984191/results/?format=json" # sagan documentation for this is deprecated, use: https://atlas.ripe.net/docs/apis/rest-api-reference/#measurements
+def get_traceroute_results(measurementid):
+    if not measurementid:
+        raise ValueError("Measurement ID is required")
+    source = f"https://atlas.ripe.net/api/v2/measurements/{measurementid}/results/?format=json" # sagan documentation for this is deprecated, use: https://atlas.ripe.net/docs/apis/rest-api-reference/#measurements
     traceroute_result = requests.get(source)
     if traceroute_result.status_code == 200: # 200 means success
         traceroute_result_json = traceroute_result.json()
