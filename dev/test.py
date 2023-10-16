@@ -3,6 +3,7 @@ from ripe.atlas.sagan import SslResult, TracerouteResult, Result, traceroute
 from ripe.atlas.cousteau import ProbeRequest, Probe, AtlasResultsRequest, AtlasLatestRequest
 import os
 import requests
+import geoip2.webservice
 
 def testing_ripe_atlas_tools(): # testing done, deprecated
     # find all the probes in Alaska (lists the canada one too, just discard)
@@ -51,15 +52,21 @@ def get_traceroute_results():
                             # raise Exception('packet empty')
                     else:
                         print("   - No AS information available for this node")
-
-
-
-        
     else:
         raise Exception("HTTP request to API failed")
+
+def test_geolite2():
+    with geoip2.webservice.Client(account_id=926113, license_key='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', host="geolite.info") as client:
+        response = client.city('165.16.221.228')
+        print(response.country.iso_code)
+        print(response.country.name)
+        print(response.city.name)
+        print(response.location.latitude)
+        print(response.location.longitude)
+
     
 
 
 
 if __name__ == "__main__":
-    get_traceroute_results()
+    test_geolite2()

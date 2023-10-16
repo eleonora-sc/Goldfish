@@ -1,0 +1,24 @@
+{
+    "measurement_id": 61984614,
+    "source_probe_list": "14300,52344,61868,61113",
+    "target_ip": "165.16.221.228",
+
+    "source_probes": [
+        {
+            "probe_num": 1,
+            "probe_id": 14300,
+            "probe_ip": "xxx.xxx.xxx.xxx",
+            "probe_lat": "some latitude",
+            "probe_long": "some longitude",
+            "hops": [
+                {
+                    "hop_num": 1,
+                    "hop_ip": "xxx.xxx.xxx.xxx",
+                    "hop_rtt": 138.22,
+                    "hop_lat": "some latitude",
+                    "hop_long": "some longitude"
+                }
+            ]
+        }
+    ]
+}

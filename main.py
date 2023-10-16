@@ -2,6 +2,9 @@ from logger import Logger
 from create_measurements.create_measurements import CreateMeasurements
 from dotenv import load_dotenv
 from os import getenv
+
+
+
 if __name__ == "__main__":
     load_dotenv()
     logger = Logger()
