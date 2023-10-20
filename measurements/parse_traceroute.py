@@ -4,9 +4,16 @@ from ripe.atlas.cousteau import ProbeRequest, Probe, AtlasResultsRequest, AtlasL
 import os
 import requests
 import geoip2.webservice
+from dotenv import load_dotenv
+from os import getenv
+from logger import Logger
 
 def get_lat_long(ip:str):
-    with geoip2.webservice.Client(account_id=926113, license_key='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', host="geolite.info") as client:
+    load_dotenv()
+    logger = Logger()
+    GEOLITE_API_KEY = getenv("GEOLITE_API_KEY")
+    GEOLITE_ACCOUNT_ID = getenv("GEOLITE_ACCOUNT_ID")
+    with geoip2.webservice.Client(account_id=GEOLITE_ACCOUNT_ID, license_key=GEOLITE_API_KEY, host="geolite.info") as client:
         try:
             response = client.city(ip)
             # use logger for this instead
