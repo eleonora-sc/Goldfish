@@ -1,5 +1,5 @@
 from logger import Logger
-from create_measurements.create_measurements import CreateMeasurements
+from measurements.create_measurements import CreateMeasurements
 from dotenv import load_dotenv
 from os import getenv
 
