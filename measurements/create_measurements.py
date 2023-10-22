@@ -3,7 +3,7 @@ from ripe.atlas.sagan import SslResult
 import os
 from dotenv import load_dotenv
 from datetime import datetime
-import pandas as pd
+from api.mongo import add_measurements_to_db, client
 
 class CreateMeasurements:
     def __init__(self, ATLAS_API_KEY:str):
@@ -52,12 +52,7 @@ class CreateMeasurements:
         pass
 
     def create_traceroute_measurements(self):
-        measurement_data = pd.DataFrame({
-            "source":[],
-            "target":[],
-            "measurement_id":[]
-
-        })
+        traceroute_measurements = []
         if(self.target_ips == None or self.sources == None or self.sources_str == "" or self.targets == None):
             raise ValueError("All data not loaded in")
         for i, target in enumerate(self.target_ips):
@@ -85,13 +80,14 @@ class CreateMeasurements:
             (is_success, response) = atlas_request.create()
             print(is_success)
             print(response)
-            temp_dataframe = pd.DataFrame({
-            "source":[self.sources_str],
-            "target":[target],
-            "measurement_id":[int(response['measurements'][0])]
+            if is_success:
+                traceroute_measurements.append({
+                    "sources": self.sources_str,
+                    "target": target,
+                    "description": f"Goldfish OFFICIAL traceroute measurement to {target}",
+                    "measurement_id": response.get("measurements"),
+                    "type": "traceroute"
+                })
+        add_measurements_to_db(traceroute_measurements)
 
-            })
-            measurement_data = pd.concat([measurement_data,temp_dataframe],ignore_index=True)
-            measurement_data['measurement_id'] = measurement_data['measurement_id'].astype('Int64')
-        measurement_data.to_csv("./measurements.csv",mode='a',header=False,index=False)
 
