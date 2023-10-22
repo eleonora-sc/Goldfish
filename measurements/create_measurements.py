@@ -1,6 +1,6 @@
 from ripe.atlas.cousteau import AtlasSource, AtlasCreateRequest, Ping, Traceroute, Probe
 from ripe.atlas.sagan import SslResult
-import os
+import json
 from dotenv import load_dotenv
 from datetime import datetime
 from api.mongo import add_measurements_to_db, client
@@ -22,13 +22,12 @@ class CreateMeasurements:
         target_ips = []
         for i, target in enumerate(self.targets):
             probe = Probe(id=target)
-            target_ips.append(probe.address_v4)
+            target_ips.append((probe.address_v4,target,self.targets[target]))
             if self.logger:
                 self.logger.log(f"{probe.country_code} - {probe.address_v4}")
         self.target_ips = target_ips
-        print(self.target_ips)
 
-    def load_targets(self, targets:dict[int, str]):
+    def load(self, source:dict[int,str], targets:dict[int, str]):
         """
         This sets self.targets to be used in creating measurements and sets the ips associated with them
         Args:
@@ -37,16 +36,12 @@ class CreateMeasurements:
         """
         self.targets = targets
         self.__load_target_ips()
-
-    def load_sources(self, source:dict[int,str]):
         self.sources = source
         for i,key in enumerate(self.sources):
             if i < len(self.sources)-1:
                 self.sources_str  = self.sources_str + str(key)+","
             else:
                 self.sources_str = self.sources_str + str(key)
-        print(self.sources_str)
-
 
     def create_ping_measurements(self):
         pass
@@ -59,7 +54,7 @@ class CreateMeasurements:
             print(f"trying target {i}, with target {target}")
             traceroute = Traceroute(
                 af=4, # address family ie ipv4 and ipv6
-                target = target,
+                target = target[0],
                 description = f"Goldfish OFFICIAL traceroute measurement to {target}",
                 protocol="ICMP",
             )
@@ -82,9 +77,11 @@ class CreateMeasurements:
             print(response)
             if is_success:
                 traceroute_measurements.append({
-                    "sources": self.sources_str,
-                    "target": target,
-                    "description": f"Goldfish OFFICIAL traceroute measurement to {target}",
+                    "sources": json.dumps(self.sources),
+                    "destination_probe": target[1],
+                    "destination_name": target[2],
+                    "target": target[0],
+                    "description": f"Goldfish OFFICIAL traceroute measurement to {target[0]}",
                     "measurement_id": response.get("measurements"),
                     "type": "traceroute"
                 })
