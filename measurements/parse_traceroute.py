@@ -11,7 +11,6 @@ from api.mongo import get_traceroute_ids
 
 def get_lat_long(ip:str):
     load_dotenv()
-    logger = Logger()
     GEOLITE_API_KEY = getenv("GEOLITE_API_KEY")
     GEOLITE_ACCOUNT_ID = getenv("GEOLITE_ACCOUNT_ID")
     with geoip2.webservice.Client(account_id=GEOLITE_ACCOUNT_ID, license_key=GEOLITE_API_KEY, host="geolite.info") as client:
