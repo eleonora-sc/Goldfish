@@ -1,3 +1,9 @@
 ---
 layout: index
 ---
+
+{% for page in site.html_pages %}
+
+<div>{{ page.url }}</div>
+
+{% endfor %}
