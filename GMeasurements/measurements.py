@@ -9,15 +9,25 @@ https://atlas.ripe.net/docs/apis/rest-api-manual/
 
 import requests
 import json
+from enum import Enum, auto
 from dotenv import load_dotenv
 from os import getenv
 
-class RipeMeasurement():
+class MeasurementType(Enum):
+    PING = auto()
+    TRACEROUTE = auto()
+
+
+class MeasurementDefinitions():
+    pass
+
+
+class RipeAtlasMeasurements():
     def __init__(self):
         self.base_url = "https://atlas.ripe.net/"
         self.auth_key = getenv("RIPE_ATLAS_KEY","NONE")
         self.post_header = "Authorization: Key " + self.auth_key
-
+        
     def get_finished_measurements(self):
         pass
 
