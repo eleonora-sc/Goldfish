@@ -75,20 +75,51 @@ class TracerouteParams(TypedDict):
     is_oneoff: NotRequired[bool]
 
 class PingParams(TypedDict):
-    target: str
-    description: str
-    type: str
-    af: int
+    target: Required[str]
+    description: Required[str]
+    type: Required[str]
+    af: Required[int]
     resolve_on_probe: NotRequired[bool]
     is_public: NotRequired[bool]
 
-class GetProbeParams(TypedDict):
-    pass
-
-class GetMeasurementParams(TypedDict):
-    pass
+class GetProbesParams(TypedDict):
+    country_code: NotRequired[str]
+    id__lt: NotRequired[int]
+    id__lte: NotRequired[int]
+    id__gte: NotRequired[int]
+    id__gt: NotRequired[int]
+    id__in: NotRequired[str]
+    latitude: NotRequired[str]
+    latitude__lt: NotRequired[str]
+    latitude__lte: NotRequired[str]
+    latitude__gte: NotRequired[str]
+    latitude__gt: NotRequired[str]
+    longitude: NotRequired[str]
+    longitude__lt: NotRequired[str]
+    longitude__lte: NotRequired[str]
+    longitude__gte: NotRequired[str]
+    longitude__gt: NotRequired[str]
+    asn: NotRequired[str]
+    asn_v4: NotRequired[str]
+    asn_v4__in: NotRequired[str]
+    asn_v6: NotRequired[str]
+    asn_v6__in: NotRequired[str]
+    prefix_v4: NotRequired[str]
+    prefix_v6: NotRequired[str]
+    status: NotRequired[str]
+    status_name: NotRequired[str]
+    is_anchor: NotRequired[bool]
+    is_public: NotRequired[bool]
+    tags: NotRequired[str]
+    radius: NotRequired[str]
+    country_code__in: NotRequired[str]
+    include: NotRequired[str]
+    optional_fields: NotRequired[str]
+    format: NotRequired[str]
+    sort: NotRequired[str]
 
 class ProbeParams(TypedDict):
-    requested: int
-    type: str
-    value: Union[str,int]
+    requested: Required[int]
+    type: Required[str]
+    value: Required[Union[str,int]]
+
