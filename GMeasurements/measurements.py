@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 """
 
 
@@ -16,26 +16,20 @@ from dotenv import load_dotenv
 from os import getenv
 load_dotenv()
 
-
-class MeasurementType(Enum):
-    PING = auto()
-    TRACEROUTE = auto()
-
-class ProbeType(Enum):
-    AREA = auto()
-    COUNTRY = auto()
-    PROBES = auto()
-    UDM = auto
-
-
-
-
 class Payload():
-
     def __init__(self):
         self.definitions: List[Dict[str, Any]] = []
         self.probes: List[Dict[str, Any]] = []
         self.payload: Dict[str, Any] = {}
+        self.base_measurement_keys ={
+            "description", "af", "type", "resolve_on_probe", "is_oneoff", "start_time", "stop_time", "interval", "spread", "is_public"
+        }
+        self.base_required_keys = {
+            "description", "af", "type"
+        }
+        self.base_start_time = None
+        self.base_end_time = None
+        self.base_is_one_off = None
 
     def _add_definition(self, required_keys, valid_type, all_keys, **kwargs):
         if not required_keys.issubset(kwargs):
@@ -48,23 +42,31 @@ class Payload():
         self.definitions.append(definition)
 
     def add_traceroute_definition(self, **kwargs: Unpack[TracerouteParams]) -> None:
-        required_keys = {"target", "description", "type", "af"}
-        all_keys = [
-            "target", "description", "type", "af", "resolve_on_probe",
-            "is_public", "packets", "protocol", "paris", "firsthop",
-            "interval", "is_oneoff"
-        ]
+        traceroute_required_keys = {"target"}
+        traceroute_all_keys = {
+            "target", "response_timeout", "packets", "paris", "size", "first_hop", "max_hops", "protocol"
+        }
+        required_keys = traceroute_required_keys | self.base_required_keys
+        all_keys = traceroute_all_keys | self.base_measurement_keys
         self._add_definition(required_keys, "traceroute", all_keys, **kwargs)
 
     def add_ping_definition(self, **kwargs: Unpack[PingParams]) -> None:
-        required_keys = {"target", "description", "type", "af"}
-        all_keys = [
-            "target", "description", "type", "af", "resolve_on_probe",
-            "is_public"
-        ]
+        ping_required_keys = {"target"}
+        ping_all_keys = {
+            "target", "packets", "size", "packet_interval", "include_probe_id"
+        }
+        required_keys = ping_required_keys | self.base_required_keys
+        all_keys = ping_all_keys | self.base_measurement_keys
         self._add_definition(required_keys, "ping", all_keys, **kwargs)
 
     def add_probe(self, **kwargs:Unpack[PingParams]) -> None:
+        """
+        Adds a probe to the payload.
+
+        Args:
+            **kwargs (PingParams): The probe parameters.
+            
+        """
         probe = {}
         required_keys = {"requested", "type", "value"}
         if not required_keys.issubset(kwargs):
@@ -76,6 +78,12 @@ class Payload():
         self.probes.append(probe)
 
     def get_payload(self) -> Dict[str, Any]:
+        """
+        Returns the payload in the format required by the RIPE Atlas API.
+
+        Returns:
+            Dict[str, Any]: The payload in the format required by the RIPE Atlas API.
+        """
         if len(self.definitions) == 0:
             raise ValueError("No definitions found")
         if len(self.probes) == 0:
@@ -95,8 +103,7 @@ class RipeAtlasMeasurements():
         }
         self.key = ATLAS_API_KEY
 
-
-    def _post(self, base_url:str, payload:dict, type=None):
+    def _post(self, base_url:str, payload:dict):
         """
         Performs a post request to the RIPE Atlas v2 API.
 
@@ -114,8 +121,7 @@ class RipeAtlasMeasurements():
         if(response.status_code == 201):
             return response.json()
         else:
-            return {"error": f"Returned with status code {response.status_code}"}
-
+            return {"error": response.json()}
 
     def _get_json_response(self, base_url, type=None):
         """
@@ -135,30 +141,8 @@ class RipeAtlasMeasurements():
             return response.json()
         else:
             return {"error": f"Returned with status code {response.status_code}"}
-
-
-    # def _put(self):
-    #     pass
-
-    # def _patch(self):
-    #     pass
-
-    # def _delete(self):
-    #     pass
-
-    # def get_finished_measurements(self):
-    #     pass
-
-    # def get_failed_measurements(self):
-    #     pass
-
-    # def get_successful_measurements(self):
-    #     pass
-
-    # def get_ongoing_measurements(self):
-    #     pass
     
-    def get_traceroute_measurement(self, msm_id:str, start:datetime.datetime=None,  stop:datetime.datetime=None):
+    def get_traceroute_measurement(self, msm_id:str, start:datetime=None,  stop:datetime=None):
         """_summary_
 
         Args:
@@ -182,72 +166,13 @@ class RipeAtlasMeasurements():
             raise ValueError(f"Bad Request in get_probes with error: {response['error']}")
 
         return response[0] # CAUTION: we are only concerned with one-off traceroute measurements, hence we only grab the first result in the list, which is the only result with one-off traceroute measurements
-        
-    def get_ping_measurement(self):
-        pass
 
-    # def get_measurement_status(self):
-    #     pass
-
-    def create_measurement(self, type, payload):
-        base_url = "/api/v2/measurements/"
-
-        if type == MeasurementType.TRACEROUTE:
-            pass
-        elif type == MeasurementType.PING:
-            pass
-
-    def create_traceroute_measurement(self, target:str, description:str, af:int, probe_ids:list):
-        """
-        This function creates a RIPE Atlas traceroute measurement.
-
-        Args:
-            target (str): The url or ip of the target of the traceroute measurement.
-            description (str): A description of this measurement.
-            af (int): either IPv4 (af=4) or IPv6 (af=6)
-            probe_ids (list): A list consisting of the IDs (as integers) of the probes participating in this measurement.
-
-        Returns:
-            list: List of measurement IDs of the measurements created by this request.
-        """
-
+    def create_measurement(self, type, payload:Payload):
         base_url = "measurements/"
-        # construct the payload, some of this should be handled in create_measurements
-        payload = {
-            "definitions": [
-                {
-                    "target": target,
-                    "description": description,
-                    "type": "traceroute",
-                    "af": af,
-                }
-            ],
-            "probes": [
-                {
-                    "type": "probes",
-                    "value": ','.join([str(item) for item in probe_ids]), # must be in format: "3045934,230492304,23423423" 
-                    "requested": len(probe_ids),
-                }
-            ],
-            "is_oneoff": True,
-        }
-
-        measurement_ids = self._post(base_url=base_url, payload=payload) # response is a dict with one field: measurements: [list of measurement ids]
-        
-        if "error" in measurement_ids.keys():
-            raise ValueError(f"Bad Request in get_probes with error: {measurement_ids['error']}")
-
-        return measurement_ids['measurements']
-
-
-    def create_ping_measurement(self):
-        pass
-
-    def create_dns_measurement(self):
-        pass
-
-    def stop_measurement(self):
-        pass
+        measurement= self._post(base_url=base_url, payload=payload.get_payload()) # response is a dict with one field: measurements: [list of measurement ids]
+        if "error" in measurement:
+            raise ValueError(f"Bad Request in create_measurement with error: {measurement['error']}")
+        return measurement["measurements"]
 
     def get_probes(self, **kwargs:Unpack[GetProbesParams]) -> list:
         """ 
@@ -319,4 +244,14 @@ class RipeAtlasMeasurements():
             probes_list.append(probe_data)
         return probes_list
     
+
+create_measurement = RipeAtlasMeasurements("4001f1c2-f49d-4727-85f6-62322b76eaac")
+
+payload = Payload()
+payload.add_ping_definition(target="ripe.net",description="Test",type="ping",af=4)
+payload.add_probe(requested=1,type="area",value="WW")
+
+measurement = create_measurement.create_measurement(type="ping",payload=payload)
+
+print(measurement)
 

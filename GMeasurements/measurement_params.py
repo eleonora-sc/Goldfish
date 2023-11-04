@@ -1,5 +1,5 @@
 from typing import Any, Dict, List, Optional, Unpack, Required, Optional, TypedDict, Union, NotRequired,overload
-
+from datetime import datetime
 
 class GetMeasurementParams(TypedDict):
     sort: NotRequired[str]
@@ -60,27 +60,54 @@ class GetMeasurementParams(TypedDict):
     key: NotRequired[str]
     mine: NotRequired[bool]
 
-class TracerouteParams(TypedDict):
-    target: Required[str]
+class MeasurementParams(TypedDict):
     description: Required[str]
-    type: Required[str]
     af: Required[int]
+    type: Required[str]
     resolve_on_probe: NotRequired[bool]
-    is_public: NotRequired[bool]
-    packets: NotRequired[int]
-    protocol: NotRequired[str]
-    paris: NotRequired[int]
-    firsthop: NotRequired[int]
-    interval: NotRequired[int]
     is_oneoff: NotRequired[bool]
-
-class PingParams(TypedDict):
-    target: Required[str]
-    description: Required[str]
-    type: Required[str]
-    af: Required[int]
-    resolve_on_probe: NotRequired[bool]
+    start_time: NotRequired[datetime]
+    stop_time: NotRequired[datetime]
+    interval: NotRequired[int]
+    spread: NotRequired[int]
     is_public: NotRequired[bool]
+
+class TracerouteParams(MeasurementParams):
+    target: Required[str]
+    response_timeout: NotRequired[int]
+    packets: NotRequired[int]
+    paris: NotRequired[int]
+    size: NotRequired[int]
+    first_hop: NotRequired[int]
+    max_hops: NotRequired[int]
+    protocol: NotRequired[str]
+
+class SSLCertParams(MeasurementParams):
+    target: Required[str]
+
+class HTTPParams(MeasurementParams):
+    target: Required[str]
+
+class NTPParams(MeasurementParams):
+    target: Required[str]
+
+class PingParams(MeasurementParams):
+    target: Required[str]
+    packets: NotRequired[int]
+    size: NotRequired[int]
+    packet_interval: NotRequired[int]
+    include_probe_id: NotRequired[bool]
+
+class DNSParams(MeasurementParams):
+    query_class: Required[str]
+    query_type: Required[str]
+    query_argument: Required[str]
+    target_server: NotRequired[str]
+    timeout: NotRequired[int]
+    udp_payload_size: NotRequired[int]
+    retry_times: NotRequired[int]
+    protocol: NotRequired[str]
+    use_probes_resolver: NotRequired[bool]
 
 class GetProbesParams(TypedDict):
     country_code: NotRequired[str]
