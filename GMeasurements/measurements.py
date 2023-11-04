@@ -1,3 +1,4 @@
+import datetime
 """
 
 
@@ -31,19 +32,50 @@ class MeasurementDefinitions():
             "probes":probes
         }
 
-    
+
 class RipeAtlasMeasurements():
-    def __init__(self):
-        self.url = "https://atlas.ripe.net"
-        self.auth_key = getenv("RIPE_ATLAS_KEY","NONE")
+    def __init__(self, ATLAS_API_KEY):
+        self.url = "https://atlas.ripe.net/api/v2/"
         self.headers = {
-            "Authorization" : None
+            "Content-Type": "application/json",
+            "Authorization" : f"Key {ATLAS_API_KEY}"
         }
+        self.key = ATLAS_API_KEY
 
-    def _post(self):
-        pass
 
-    def _get_json_response(self,base_url, type=None):
+    def _post(self, base_url:str, payload:dict, type=None):
+        """
+        Performs a post request to the RIPE Atlas v2 API.
+
+        Args:
+            base_url (string): _description_
+            type (_type_, optional): _description_. Defaults to None.
+
+        Returns:
+            list: The response from the API if successful or an error message if unsuccessful.
+        """
+
+        request_url = self.url + base_url # + f"?key={self.key}"
+        response = post(url=request_url, headers=self.headers, data=json.dumps(payload))
+
+        if(response.status_code == 201):
+            return response.json()
+        else:
+            return {"error": f"Returned with status code {response.status_code}"}
+
+
+    def _get_json_response(self, base_url, type=None):
+        """
+        Performs a GET request to the RIPE Atlas v2 API.
+
+        Args:
+            base_url (string): The portion of the url that defines what information is retrieved from the API.
+            type (_type_, optional): _description_. Defaults to None.
+
+        Returns:
+            list/dict: If successful, returns the response from the API, which can be a list or a dict.
+            dict: If GET request unsuccessful, returns a dict with the error message.
+        """
         request_url = self.url + base_url
         response = get(request_url)
         if(response.status_code == 200):
@@ -52,41 +84,103 @@ class RipeAtlasMeasurements():
             return {"error": f"Returned with status code {response.status_code}"}
 
 
-    def _put(self):
-        pass
+    # def _put(self):
+    #     pass
 
-    def _patch(self):
-        pass
+    # def _patch(self):
+    #     pass
 
-    def _delete(self):
-        pass
+    # def _delete(self):
+    #     pass
 
-    def get_finished_measurements(self):
-        pass
+    # def get_finished_measurements(self):
+    #     pass
 
-    def get_failed_measurements(self):
-        pass
+    # def get_failed_measurements(self):
+    #     pass
 
-    def get_successful_measurements(self):
-        pass
+    # def get_successful_measurements(self):
+    #     pass
 
-    def get_ongoing_measurements(self):
-        pass
+    # def get_ongoing_measurements(self):
+    #     pass
     
-    def get_traceroute_measurement(self,**kwargs):
-        pass
+    def get_traceroute_measurement(self, msm_id:str, start:datetime.datetime=None,  stop:datetime.datetime=None):
+        """_summary_
+
+        Args:
+            msm_id (str): _description_
+            start (datetime.datetime, optional): _description_. Defaults to None.
+            stop (datetime.datetime, optional): _description_. Defaults to None.
+
+        Returns:
+            dict: The results of the measurement in json format.
+        """
+
+        base_url = f"measurements/{msm_id}/results/"
+
+        if start and stop:
+            unix_start = int(start.timestamp()) # requires UNIX timestamp as an integer
+            unix_stop = int(stop.timestamp()) # requires UNIX timestamp as an integer
+            base_url += f"?start={unix_start}&{unix_stop}"
+
+        response = self._get_json_response(base_url=base_url)
+        if type(response) == dict:
+            raise ValueError(f"Bad Request in get_probes with error: {response['error']}")
+
+        return response[0] # CAUTION: we are only concerned with one-off traceroute measurements, hence we only grab the first result in the list, which is the only result with one-off traceroute measurements
         
     def get_ping_measurement(self):
         pass
 
-    def get_measurement_status(self):
-        pass
+    # def get_measurement_status(self):
+    #     pass
 
     def create_measurement(self):
         pass
 
-    def create_traceroute_measurement(self):
-        pass
+    def create_traceroute_measurement(self, target:str, description:str, af:int, probe_ids:list):
+        """
+        This function creates a RIPE Atlas traceroute measurement.
+
+        Args:
+            target (str): The url or ip of the target of the traceroute measurement.
+            description (str): A description of this measurement.
+            af (int): either IPv4 (af=4) or IPv6 (af=6)
+            probe_ids (list): A list consisting of the IDs (as integers) of the probes participating in this measurement.
+
+        Returns:
+            list: List of measurement IDs of the measurements created by this request.
+        """
+
+        base_url = "measurements/"
+        # construct the payload, some of this should be handled in create_measurements
+        payload = {
+            "definitions": [
+                {
+                    "target": target,
+                    "description": description,
+                    "type": "traceroute",
+                    "af": af,
+                }
+            ],
+            "probes": [
+                {
+                    "type": "probes",
+                    "value": ','.join([str(item) for item in probe_ids]), # must be in format: "3045934,230492304,23423423" 
+                    "requested": len(probe_ids),
+                }
+            ],
+            "is_oneoff": True,
+        }
+
+        measurement_ids = self._post(base_url=base_url, payload=payload) # response is a dict with one field: measurements: [list of measurement ids]
+        
+        if "error" in measurement_ids.keys():
+            raise ValueError(f"Bad Request in get_probes with error: {measurement_ids['error']}")
+
+        return measurement_ids['measurements']
+
 
     def create_ping_measurement(self):
         pass
@@ -127,7 +221,7 @@ class RipeAtlasMeasurements():
         """
         format="json"
         args = locals()
-        base_url = "/api/v2/probes/"
+        base_url = "probes/"
         query_params=""
         IS_PARAMS = False
         for (key,value) in args.items():
@@ -160,9 +254,4 @@ class RipeAtlasMeasurements():
 
 
 
-measure = RipeAtlasMeasurements()
-radius=(61.2176,-149.8997,10)
-probes = measure.get_probes(radius=radius)
-                
-                
 
