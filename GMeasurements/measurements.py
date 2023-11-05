@@ -1,4 +1,5 @@
 from datetime import datetime
+import pandas as pd
 """
 
 
@@ -142,7 +143,12 @@ class RipeAtlasMeasurements():
         else:
             return {"error": f"Returned with status code {response.status_code}"}
     
-    def get_traceroute_measurement(self, msm_id:str, start:datetime=None,  stop:datetime=None):
+    def get_generic_measurement(self, msm_id:str):
+        base_url = f"measurements/{msm_id}/"
+        response = self._get_json_response(base_url=base_url)
+        return response
+
+    def get_measurement_result(self, msm_id:str, start:datetime=None, stop:datetime=None):
         """_summary_
 
         Args:
@@ -157,15 +163,17 @@ class RipeAtlasMeasurements():
         base_url = f"measurements/{msm_id}/results/"
 
         if start and stop:
-            unix_start = int(start.timestamp()) # requires UNIX timestamp as an integer
-            unix_stop = int(stop.timestamp()) # requires UNIX timestamp as an integer
-            base_url += f"?start={unix_start}&{unix_stop}"
-
+            base_url += f"?start_time={start.timestamp()}&stop_time={stop.timestamp()}"
+        elif start:
+            base_url += f"?start_time={start.timestamp()}"
+        elif stop:
+            base_url += f"?stop_time={stop.timestamp()}"
+        
         response = self._get_json_response(base_url=base_url)
         if type(response) == dict:
             raise ValueError(f"Bad Request in get_probes with error: {response['error']}")
 
-        return response[0] # CAUTION: we are only concerned with one-off traceroute measurements, hence we only grab the first result in the list, which is the only result with one-off traceroute measurements
+        return response # CAUTION: we are only concerned with one-off traceroute measurements, hence we only grab the first result in the list, which is the only result with one-off traceroute measurements
 
     def create_measurement(self, type, payload:Payload):
         base_url = "measurements/"
@@ -247,11 +255,12 @@ class RipeAtlasMeasurements():
 
 create_measurement = RipeAtlasMeasurements("4001f1c2-f49d-4727-85f6-62322b76eaac")
 
-payload = Payload()
-payload.add_ping_definition(target="ripe.net",description="Test",type="ping",af=4)
-payload.add_probe(requested=1,type="area",value="WW")
 
-measurement = create_measurement.create_measurement(type="ping",payload=payload)
+measurement = create_measurement.get_measurement_result("62390085")
+measurement2 = create_measurement.get_generic_measurement("62390085")
 
-print(measurement)
 
+mdf = pd.DataFrame(measurement)
+
+print(mdf.head())
+mdf.to_csv("test.csv",mode='w',index=False)
