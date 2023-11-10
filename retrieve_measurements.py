@@ -9,8 +9,6 @@ Intended use: retrieve a traceroute or ping measurement result and prepare it fo
 """
 
 from GMeasurements.measurements import RipeAtlasMeasurements
-from dotenv import load_dotenv
-from os import getenv
 import json
 
 def format_traceroute_result(result:list):
@@ -20,7 +18,6 @@ def format_traceroute_result(result:list):
         remove_keys = ["fw", "mver", "lts", "endtime", "dst_name", "proto", "af", "size", "paris_id", "timestamp", "msm_name", "from", "type", "group_id", "stored_timestamp"]
         for key in remove_keys:
             probe.pop(key, None)
-        del probe["fw"]
 
         # clean up hop data
         # for hop in 
