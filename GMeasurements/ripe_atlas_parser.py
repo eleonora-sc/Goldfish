@@ -1,6 +1,3 @@
-from logger import Logger
-
-
 def parse_traceroute_measurement():
     pass
 

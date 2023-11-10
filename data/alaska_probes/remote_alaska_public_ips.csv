@@ -8,6 +8,17 @@ Alakanuk,67.58.30.2,2023-11-6,not sure
 Metlakatla,64.186.125.1,2023-11-6,yes
 Dillingham,107.152.126.47,2023-11-6,not sure
 Chevak,24.237.232.2,2023-11-6,yes,resolves to chevak.kasd.schoolaccess.net
+Unalaska/Dutch Harbor,172.87.239.1,2023-11-9,yes
+Nunapitchuk,66.58.251.1,2023-11-9,not sure
 
 
 
+Barrow,24.237.124.4
+Barrow,empowerweb.ilisagvik.edu/fusebox.cfm
+
+have been using:
+https://tools.keycdn.com/geo
+https://ipwhois.io
+https://ip-api.com
+https://whatismyipaddress.com
+to verify location of ip addresses
