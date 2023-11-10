@@ -96,7 +96,7 @@ class Payload():
 
 
 class RipeAtlasMeasurements():
-    def __init__(self, ATLAS_API_KEY):
+    def __init__(self, ATLAS_API_KEY=None):
         self.url = "https://atlas.ripe.net/api/v2/"
         self.headers = {
             "Content-Type": "application/json",

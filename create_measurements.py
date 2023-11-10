@@ -5,6 +5,7 @@ import json
 import csv
 from datetime import datetime
 
+# TEST MEASUREMENTS
 def test_oneoff_ping(auth_key):
     # create an instance of class RipeAtlasMeasurement that can be used for a lot of different measurements
     measurement = RipeAtlasMeasurements(ATLAS_API_KEY=auth_key)
@@ -98,28 +99,15 @@ def test_ongoing_ping(auth_key):
             writer.writerow([measurement])
 
 
-
-
-if __name__ == "__main__":
-    load_dotenv()
-    auth_key = getenv("ATLAS_API_KEY","NONE")
-    if auth_key == "None":
-        raise("error getting atlas api key")
-    
-    # test_oneoff_ping(auth_key)
-    # test_ongoing_ping(auth_key)
-
-
-    
-    # CREATE OUR CONTINUOUS PING MEASUREMENTS
-    
+# OFFICIAL MEASUREMENTS
+def create_ongoing_ping(auth_key): 
     # create an instance of class RipeAtlasMeasurement that can be used for a lot of different measurements
     measurement = RipeAtlasMeasurements(ATLAS_API_KEY=auth_key)
 
     seattle_anchor_id = 7221
     new_payload = Payload()
 
-    target_list = [
+    remote_target_list = [
         {"Kotzebue 1": "216.163.106.1"}, 
         {"Kotzebue 2": "74.127.92.1"},
         {"Nome":"67.59.96.3"},
@@ -133,11 +121,18 @@ if __name__ == "__main__":
         {"Barrow":"24.237.124.4"} # not sure
         ]
     
-    for target in target_list:
+    # these are the comparison targets 
+    compare_target_list = [
+        {},
+        {},
+        {}
+    ]
+    
+    for target in remote_target_list:
         (key, value), = target.items()
         ping_params = {
         "target": value,  # Target IP address or hostname to ping
-        "description": f"testing jaren's ripe atlas api wrapper, pinging {value} in {key}",
+        "description": f"official measurement, pinging {value} in {key}",
         "af": 4,  # Address family, 4 for IPv4, 6 for IPv6
         "type": "ping",
         "packets": 3,  # Number of ping packets to send
@@ -170,8 +165,23 @@ if __name__ == "__main__":
     print(new_measurement)
     
     # appends measurement ids to this csv
-    with open("data/measurements/test_measurements.csv", mode='a', newline='') as f:
+    with open("data/measurements/ping_measurements.csv", mode='a', newline='') as f:
         writer = csv.writer(f)
         for measurement in new_measurement:
             writer.writerow([measurement])
 
+
+
+
+if __name__ == "__main__":
+    load_dotenv()
+    auth_key = getenv("ATLAS_API_KEY","NONE")
+    if auth_key == "None":
+        raise("error getting atlas api key")
+    
+    # test_oneoff_ping(auth_key)
+    # test_ongoing_ping(auth_key)
+
+
+    
+    
