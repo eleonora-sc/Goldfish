@@ -10,10 +10,16 @@ Intended use: retrieve a traceroute or ping measurement result and prepare it fo
 
 from GMeasurements.measurements import RipeAtlasMeasurements
 import json
+from requests import get
+
+def get_geolocation_info(ip):
+    response = get(f"http://ip-api.com/json/{ip}?fields=status,message,countryCode,city,lat,lon,isp,reverse,hosting")
+    print(response.json())
+
 
 def format_traceroute_result(result:list):
     formatted_result = [] # list of probes used in this measurement
-    
+
     # for each probe used, format the result
     for probe in result:
         new_probe = {} # 1
@@ -26,7 +32,7 @@ def format_traceroute_result(result:list):
         new_probe["dst_lat"] = -1 # added
         new_probe["dst_long"] = -1 # added
 
-
+        get_geolocation_info(new_probe["src_addr"])
         # TODO get latlongs for new_probe["src_addr"] and new_probe["dst_addr"], which are the source and destination addresses as a string
 
 
@@ -71,17 +77,33 @@ def format_traceroute_result(result:list):
     return formatted_result
 
 
+def format_ping_result(result):
+    return result
+
 def retrieve_traceroute_measurement(msm_id):
     measurement = RipeAtlasMeasurements()
     retrieved_measurement = measurement.get_measurement_result(str(msm_id))
 
     formatted_measurement = format_traceroute_result(result=retrieved_measurement)
 
-    with open(file=f"data/measurement_results/{msm_id}.json", mode='w') as f:
+    with open(file=f"data/measurement_results/traceroute-{msm_id}.json", mode='w') as f:
         json.dump(formatted_measurement, f, indent=4)
 
-    # print(retrieved_measurement)
+
+def retrieve_ping_measurement(msm_id):
+    measurement = RipeAtlasMeasurements()
+    retrieved_measurement = measurement.get_measurement_result(str(msm_id))
+
+    formatted_measurement = format_ping_result(result=retrieved_measurement)
+
+    with open(file=f"data/measurement_results/ping-{msm_id}.json", mode='w') as f:
+        json.dump(formatted_measurement, f, indent=4)
+
+
 
 if __name__ == "__main__":
     traceroute_msm_ids = [61984619, 61984618, 61984617, 61984615,61984614]
     retrieve_traceroute_measurement(traceroute_msm_ids[0])
+    ping_oneoff_msm_ids = [63464455]
+    ping_ongoing_msm_ids = [63464480, 63466931]
+    retrieve_ping_measurement(ping_ongoing_msm_ids[1])
