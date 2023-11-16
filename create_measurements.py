@@ -104,7 +104,6 @@ def create_ongoing_ping(auth_key):
     # create an instance of class RipeAtlasMeasurement that can be used for a lot of different measurements
     measurement = RipeAtlasMeasurements(ATLAS_API_KEY=auth_key)
 
-    seattle_anchor_id = 7221
     new_payload = Payload()
 
     remote_target_list = [
@@ -114,25 +113,28 @@ def create_ongoing_ping(auth_key):
         {"Bethel": "24.237.58.1"},
         {"Alakanuk": "67.58.30.2"}, # not sure
         {"Metlakatla":"64.186.125.1"},
-        # {"Dillingham":"107.152.126.47"},
-        {"Chevak":"24.237.232.2"},
+        {"Dillingham":"107.152.126.1"}, # not sure
+        {"Chevak":"24.237.232.2"}, # not sure
         {"Unalaska":"172.87.239.1"},
         {"Nunapitchuk":"66.58.251.1"},
-        {"Barrow":"24.237.124.4"} # not sure
+        {"Utqiagvik":"24.237.124.4"} # not sure
         ]
     
     # these are the comparison targets 
     compare_target_list = [
-        {},
-        {},
-        {}
+        {"Anchorage 1":"198.51.13.5"},
+        {"Anchorage 2": "154.6.93.149"},
+        {"Fairbanks 1": "199.165.82.221"},
+        {"Fairbanks 2": "66.223.176.1"},
+        {"Juneau 1": "192.245.44.0"},
+        {"Juneau 2": "23.135.128.1"}
     ]
     
     for target in remote_target_list:
         (key, value), = target.items()
         ping_params = {
         "target": value,  # Target IP address or hostname to ping
-        "description": f"official measurement, pinging {value} in {key}",
+        "description": f"PROJECT GOLDFISH - testing remote Alaska network, pinging {value} in {key} hourly",
         "af": 4,  # Address family, 4 for IPv4, 6 for IPv6
         "type": "ping",
         "packets": 3,  # Number of ping packets to send
@@ -140,19 +142,40 @@ def create_ongoing_ping(auth_key):
         "packet_interval": 1000,  # Interval between packets in milliseconds
         "include_probe_id": True,  # Whether to include the probe ID in the ping
         "is_oneoff": False,  # If this is a one-time measurement
-        "start_time":int(datetime(2023,11,10,00,1).timestamp()),
-        "stop_time":int(datetime(2023,11,13,11,59).timestamp()),
-        "interval": 7200
+        "start_time":int(datetime(2023,11,15,15,30).timestamp()),
+        "stop_time":int(datetime(2023,11,20,15,30).timestamp()),
+        "interval": 3600
+        }
+
+        # Add the ping definition to your payload
+        new_payload.add_ping_definition(**ping_params)
+    
+    for target in compare_target_list:
+        (key, value), = target.items()
+        ping_params = {
+        "target": value,  # Target IP address or hostname to ping
+        "description": f"PROJECT GOLDFISH - testing urban Alaska network for comparison with remote Alaska network, pinging {value} in {key} hourly",
+        "af": 4,  # Address family, 4 for IPv4, 6 for IPv6
+        "type": "ping",
+        "packets": 3,  # Number of ping packets to send
+        "size": 48,  # Size of the ping packets
+        "packet_interval": 1000,  # Interval between packets in milliseconds
+        "include_probe_id": True,  # Whether to include the probe ID in the ping
+        "is_oneoff": False,  # If this is a one-time measurement
+        "start_time":int(datetime(2023,11,15,15,30).timestamp()),
+        "stop_time":int(datetime(2023,11,20,15,30).timestamp()),
+        "interval": 3600
         }
 
         # Add the ping definition to your payload
         new_payload.add_ping_definition(**ping_params)
 
+    seattle_anchor_id = 7221
     # Define your probe parameters
     probe_params = {
         "requested": 1,  # Number of probes you request for the measurement
         "type": "probes",  # Type of the probe query (area, country, probes, etc.)
-        "value": "7221"  # Area, country code, or list of probes
+        "value": f"{seattle_anchor_id}"  # Area, country code, or list of probes
     }
 
     # Add the probe to your payload
@@ -161,9 +184,6 @@ def create_ongoing_ping(auth_key):
     # Create the measurement
     new_measurement = measurement.create_measurement("ping", new_payload)
 
-    
-    print(new_measurement)
-    
     # appends measurement ids to this csv
     with open("data/measurements/ping_measurements.csv", mode='a', newline='') as f:
         writer = csv.writer(f)
@@ -179,8 +199,8 @@ if __name__ == "__main__":
     if auth_key == "None":
         raise("error getting atlas api key")
     
-    # test_oneoff_ping(auth_key)
-    # test_ongoing_ping(auth_key)
+    # LATEST OFFICIAL MEASUREMENT
+    create_ongoing_ping(auth_key=auth_key)
 
 
     
