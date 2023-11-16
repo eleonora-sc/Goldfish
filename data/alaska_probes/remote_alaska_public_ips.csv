@@ -8,6 +8,27 @@ Alakanuk,67.58.30.2,2023-11-6,not sure
 Metlakatla,64.186.125.1,2023-11-6,yes
 Dillingham,107.152.126.47,2023-11-6,not sure
 Chevak,24.237.232.2,2023-11-6,yes,resolves to chevak.kasd.schoolaccess.net
+Unalaska/Dutch Harbor,172.87.239.1,2023-11-9,yes
+Nunapitchuk,66.58.251.1,2023-11-9,not sure
+Barrow,24.237.124.4
+
+Anchorage,198.51.13.5,,yes
+Anchorage,154.6.93.149,,yes
+Anchorage,137.229.113.30,,Anchorage/Wasilla
+Fairbanks,199.165.82.221,,not sure
+Fairbanks,199.165.82.216,,not sure
+Fairbanks,66.223.176.1,,yes but dynamic
+Juneau,192.245.44.0,,yes
+Juneau,24.237.155.140,,not sure
+Juneau,23.135.128.1,,yes
 
 
 
+Barrow,empowerweb.ilisagvik.edu/fusebox.cfm
+
+have been using:
+https://tools.keycdn.com/geo
+https://ipwhois.io
+https://ip-api.com
+https://whatismyipaddress.com
+to verify location of ip addresses

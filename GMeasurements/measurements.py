@@ -11,7 +11,7 @@ https://atlas.ripe.net/docs/apis/rest-api-manual/
 from typing import Any, Dict, List, Unpack, Required, NotRequired
 from requests import request, get, post
 import json
-from measurement_params import *
+from GMeasurements.measurement_params import *
 from enum import Enum, auto
 from dotenv import load_dotenv
 from os import getenv
@@ -29,7 +29,7 @@ class Payload():
             "description", "af", "type"
         }
         self.base_start_time = None
-        self.base_end_time = None
+        self.base_stop_time = None
         self.base_is_one_off = None
 
     def _add_definition(self, required_keys, valid_type, all_keys, **kwargs):
@@ -96,7 +96,7 @@ class Payload():
 
 
 class RipeAtlasMeasurements():
-    def __init__(self, ATLAS_API_KEY):
+    def __init__(self, ATLAS_API_KEY=None):
         self.url = "https://atlas.ripe.net/api/v2/"
         self.headers = {
             "Content-Type": "application/json",
@@ -173,9 +173,22 @@ class RipeAtlasMeasurements():
         if type(response) == dict:
             raise ValueError(f"Bad Request in get_probes with error: {response['error']}")
 
-        return response # CAUTION: we are only concerned with one-off traceroute measurements, hence we only grab the first result in the list, which is the only result with one-off traceroute measurements
+        return response
 
-    def create_measurement(self, type, payload:Payload):
+    def create_measurement(self, type:str, payload:Payload):
+        """
+        Create a RIPE Atlas measurement.
+
+        Args:
+            type (str): What kind of measurement? ping, traceroute
+            payload (Payload): _description_
+
+        Raises:
+            ValueError: _description_
+
+        Returns:
+            _type_: _description_
+        """
         base_url = "measurements/"
         measurement= self._post(base_url=base_url, payload=payload.get_payload()) # response is a dict with one field: measurements: [list of measurement ids]
         if "error" in measurement:
@@ -253,14 +266,14 @@ class RipeAtlasMeasurements():
         return probes_list
     
 
-create_measurement = RipeAtlasMeasurements("4001f1c2-f49d-4727-85f6-62322b76eaac")
+# create_measurement = RipeAtlasMeasurements("4001f1c2-f49d-4727-85f6-62322b76eaac")
 
 
-measurement = create_measurement.get_measurement_result("62390085")
-measurement2 = create_measurement.get_generic_measurement("62390085")
+# measurement = create_measurement.get_measurement_result("62390085")
+# measurement2 = create_measurement.get_generic_measurement("62390085")
 
 
-mdf = pd.DataFrame(measurement)
+# mdf = pd.DataFrame(measurement)
 
-print(mdf.head())
-mdf.to_csv("test.csv",mode='w',index=False)
+# print(mdf.head())
+# mdf.to_csv("test.csv",mode='w',index=False)
